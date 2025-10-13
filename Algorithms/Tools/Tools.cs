@@ -169,5 +169,84 @@ namespace Algorithms.Tools
             return result;
         }
         #endregion
+
+        #region Crop Image
+        public static Image<Gray, byte> CropImage(Image<Gray, byte> inputImage, int x1, int y1, int x2, int y2, out double mean, out double stdDev)
+        {
+            int width = x2 - x1;
+            int height = y2 - y1;
+            Image<Gray, byte> result = new Image<Gray, byte>(width, height);
+
+            double sum = 0;
+            int count = width * height;
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    byte pixelValue = inputImage.Data[y1 + y, x1 + x, 0];
+                    result.Data[y, x, 0] = pixelValue;
+                    sum += pixelValue;
+                }
+            }
+
+            mean = sum / count;
+
+            double sumSquaredDiff = 0;
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    double diff = result.Data[y, x, 0] - mean;
+                    sumSquaredDiff += diff * diff;
+                }
+            }
+
+            stdDev = System.Math.Sqrt(sumSquaredDiff / count);
+
+            return result;
+        }
+
+        public static Image<Bgr, byte> CropImage(Image<Bgr, byte> inputImage, int x1, int y1, int x2, int y2, out double mean, out double stdDev)
+        {
+            int width = x2 - x1;
+            int height = y2 - y1;
+            Image<Bgr, byte> result = new Image<Bgr, byte>(width, height);
+
+            double sumB = 0, sumG = 0, sumR = 0;
+            int count = width * height;
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    result.Data[y, x, 0] = inputImage.Data[y1 + y, x1 + x, 0];
+                    result.Data[y, x, 1] = inputImage.Data[y1 + y, x1 + x, 1];
+                    result.Data[y, x, 2] = inputImage.Data[y1 + y, x1 + x, 2];
+                    sumB += result.Data[y, x, 0];
+                    sumG += result.Data[y, x, 1];
+                    sumR += result.Data[y, x, 2];
+                }
+            }
+
+            mean = (sumB + sumG + sumR) / (count * 3);
+
+            double sumSquaredDiff = 0;
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    double diffB = result.Data[y, x, 0] - (sumB / count);
+                    double diffG = result.Data[y, x, 1] - (sumG / count);
+                    double diffR = result.Data[y, x, 2] - (sumR / count);
+                    sumSquaredDiff += diffB * diffB + diffG * diffG + diffR * diffR;
+                }
+            }
+
+            stdDev = System.Math.Sqrt(sumSquaredDiff / (count * 3));
+
+            return result;
+        }
+        #endregion
     }
 }

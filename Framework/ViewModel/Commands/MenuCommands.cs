@@ -698,6 +698,86 @@ namespace Framework.ViewModel
         }
         #endregion
 
+        #region Crop Image
+        private ICommand _cropImageCommand;
+        public ICommand CropImageCommand
+        {
+            get
+            {
+                if (_cropImageCommand == null)
+                    _cropImageCommand = new RelayCommand(CropImage);
+                return _cropImageCommand;
+            }
+        }
+
+        private void CropImage(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (MouseClickCollection.Count < 2)
+            {
+                return;
+            }
+
+            var canvases = (object[])parameter;
+            Canvas initialCanvas = canvases[0] as Canvas;
+            Canvas processedCanvas = canvases[1] as Canvas;
+
+            int x1 = (int)System.Math.Min(MouseClickCollection[0].X, MouseClickCollection[1].X);
+            int y1 = (int)System.Math.Min(MouseClickCollection[0].Y, MouseClickCollection[1].Y);
+            int x2 = (int)System.Math.Max(MouseClickCollection[0].X, MouseClickCollection[1].X);
+            int y2 = (int)System.Math.Max(MouseClickCollection[0].Y, MouseClickCollection[1].Y);
+
+            if (x1 < 0 || y1 < 0 || x2 <= x1 || y2 <= y1)
+            {
+                return;
+            }
+
+            RemoveUiElements<System.Windows.Shapes.Rectangle>(initialCanvas);
+
+            Point topLeft = new Point(x1, y1);
+            Point bottomRight = new Point(x2, y2);
+            DrawRectangle(initialCanvas, topLeft, bottomRight, 2, System.Windows.Media.Brushes.Red, ScaleValue);
+
+            ClearProcessedCanvas(processedCanvas);
+
+            double mean, stdDev;
+
+            if (GrayInitialImage != null)
+            {
+                if (x2 > GrayInitialImage.Width || y2 > GrayInitialImage.Height)
+                {
+                    return;
+                }
+
+                GrayProcessedImage = Tools.CropImage(GrayInitialImage, x1, y1, x2, y2, out mean, out stdDev);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                if (x2 > ColorInitialImage.Width || y2 > ColorInitialImage.Height)
+                {
+                    return;
+                }
+
+                ColorProcessedImage = Tools.CropImage(ColorInitialImage, x1, y1, x2, y2, out mean, out stdDev);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+            else
+            {
+                return;
+            }
+
+            MessageBox.Show($"Mean: {mean:F2}\nStandard Deviation: {stdDev:F2}", "Crop Statistics");
+
+            MouseClickCollection.Clear();
+        }
+        #endregion
+
         #endregion
 
         #region Pointwise operations

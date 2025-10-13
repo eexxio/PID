@@ -185,6 +185,16 @@
                               Command="{Binding Path=MenuCommands.RotateAntiClockwiseCommand}"
                               CommandParameter="{Binding ElementName=processedImageCanvas}"/>
                 </MenuItem>
+                <MenuItem Header="Crop image"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.CropImageCommand}">
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource arrayMultiValueConverter}">
+                            <Binding ElementName="initialImageCanvas"/>
+                            <Binding ElementName="processedImageCanvas"/>
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
 
             </MenuItem>
 
