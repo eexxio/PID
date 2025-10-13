@@ -549,6 +549,52 @@ namespace Framework.ViewModel
         }
         #endregion
 
+        #region Binary
+        private ICommand _binaryCommand;
+        public ICommand BinaryCommand
+        {
+            get
+            {
+                if (_binaryCommand == null)
+                    _binaryCommand = new RelayCommand(BinaryImage);
+                return _binaryCommand;
+            }
+        }
+
+        private void BinaryImage(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Binary operation is only available for grayscale images!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Threshold (10-145):" });
+            dialog.Title = "Binary Thresholding";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            int threshold = (int)values[0];
+
+            if (threshold < 10 || threshold > 145)
+            {
+                MessageBox.Show("Threshold must be between 10 and 145!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            GrayProcessedImage = Tools.Binary(GrayInitialImage, threshold);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+        #endregion
+
         #endregion
 
         #region Pointwise operations
