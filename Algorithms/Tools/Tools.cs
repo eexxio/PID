@@ -75,5 +75,37 @@ namespace Algorithms.Tools
             return result;
         }
         #endregion
+
+        #region Mirror Image
+        public static Image<Gray, byte> MirrorImage(Image<Gray, byte> inputImage)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(inputImage.Size);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[y, inputImage.Width - 1 - x, 0] = inputImage.Data[y, x, 0];
+                }
+            }
+            return result;
+        }
+
+        public static Image<Bgr, byte> MirrorImage(Image<Bgr, byte> inputImage)
+        {
+            Image<Bgr, byte> result = new Image<Bgr, byte>(inputImage.Size);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[y, inputImage.Width - 1 - x, 0] = inputImage.Data[y, x, 0];
+                    result.Data[y, inputImage.Width - 1 - x, 1] = inputImage.Data[y, x, 1];
+                    result.Data[y, inputImage.Width - 1 - x, 2] = inputImage.Data[y, x, 2];
+                }
+            }
+            return result;
+        }
+        #endregion
     }
 }
