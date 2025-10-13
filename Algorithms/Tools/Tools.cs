@@ -107,5 +107,67 @@ namespace Algorithms.Tools
             return result;
         }
         #endregion
+
+        #region Rotate Image
+        public static Image<Gray, byte> RotateClockwise(Image<Gray, byte> inputImage)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(inputImage.Height, inputImage.Width);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[x, inputImage.Height - 1 - y, 0] = inputImage.Data[y, x, 0];
+                }
+            }
+            return result;
+        }
+
+        public static Image<Bgr, byte> RotateClockwise(Image<Bgr, byte> inputImage)
+        {
+            Image<Bgr, byte> result = new Image<Bgr, byte>(inputImage.Height, inputImage.Width);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[x, inputImage.Height - 1 - y, 0] = inputImage.Data[y, x, 0];
+                    result.Data[x, inputImage.Height - 1 - y, 1] = inputImage.Data[y, x, 1];
+                    result.Data[x, inputImage.Height - 1 - y, 2] = inputImage.Data[y, x, 2];
+                }
+            }
+            return result;
+        }
+
+        public static Image<Gray, byte> RotateAntiClockwise(Image<Gray, byte> inputImage)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(inputImage.Height, inputImage.Width);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[inputImage.Width - 1 - x, y, 0] = inputImage.Data[y, x, 0];
+                }
+            }
+            return result;
+        }
+
+        public static Image<Bgr, byte> RotateAntiClockwise(Image<Bgr, byte> inputImage)
+        {
+            Image<Bgr, byte> result = new Image<Bgr, byte>(inputImage.Height, inputImage.Width);
+
+            for (int y = 0; y < inputImage.Height; ++y)
+            {
+                for (int x = 0; x < inputImage.Width; ++x)
+                {
+                    result.Data[inputImage.Width - 1 - x, y, 0] = inputImage.Data[y, x, 0];
+                    result.Data[inputImage.Width - 1 - x, y, 1] = inputImage.Data[y, x, 1];
+                    result.Data[inputImage.Width - 1 - x, y, 2] = inputImage.Data[y, x, 2];
+                }
+            }
+            return result;
+        }
+        #endregion
     }
 }

@@ -630,6 +630,74 @@ namespace Framework.ViewModel
         }
         #endregion
 
+        #region Rotate Image
+        private ICommand _rotateClockwiseCommand;
+        public ICommand RotateClockwiseCommand
+        {
+            get
+            {
+                if (_rotateClockwiseCommand == null)
+                    _rotateClockwiseCommand = new RelayCommand(RotateClockwise);
+                return _rotateClockwiseCommand;
+            }
+        }
+
+        private void RotateClockwise(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = Tools.RotateClockwise(GrayInitialImage);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = Tools.RotateClockwise(ColorInitialImage);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+        }
+
+        private ICommand _rotateAntiClockwiseCommand;
+        public ICommand RotateAntiClockwiseCommand
+        {
+            get
+            {
+                if (_rotateAntiClockwiseCommand == null)
+                    _rotateAntiClockwiseCommand = new RelayCommand(RotateAntiClockwise);
+                return _rotateAntiClockwiseCommand;
+            }
+        }
+
+        private void RotateAntiClockwise(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = Tools.RotateAntiClockwise(GrayInitialImage);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = Tools.RotateAntiClockwise(ColorInitialImage);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Pointwise operations
