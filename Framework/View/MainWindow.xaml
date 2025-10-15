@@ -151,6 +151,10 @@
                               Command="{Binding Path=MenuCommands.HistogramInitialImageCommand}"/>
                     <MenuItem Header="Processed image histogram"
                               Command="{Binding Path=MenuCommands.HistogramProcessedImageCommand}"/>
+                    <MenuItem Header="Initial image normalized histogram"
+                              Command="{Binding Path=MenuCommands.NormalizedHistogramInitialImageCommand}"/>
+                    <MenuItem Header="Processed image normalized histogram"
+                              Command="{Binding Path=MenuCommands.NormalizedHistogramProcessedImageCommand}"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="Copy" 

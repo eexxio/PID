@@ -67,6 +67,45 @@ namespace Framework.ViewModel
             InitializeHistogram(histograms, colors);
         }
 
+        public void CreateNormalizedHistogram(ImageType type)
+        {
+            List<double[]> histograms = new List<double[]>();
+            List<string> colors = new List<string>();
+
+            switch (type)
+            {
+                case ImageType.InitialGray:
+                    InitialHistogramOn = true;
+                    Title = "Grayscale - Initial Image Normalized Histogram";
+
+                    InitHelperNormalized(GrayInitialImage, ref histograms, ref colors);
+                    break;
+
+                case ImageType.InitialColor:
+                    InitialHistogramOn = true;
+                    Title = "Color - Initial Image Normalized Histogram";
+
+                    InitHelperNormalized(ColorInitialImage, ref histograms, ref colors);
+                    break;
+
+                case ImageType.ProcessedGray:
+                    ProcessedHistogramOn = true;
+                    Title = "Grayscale - Processed Image Normalized Histogram";
+
+                    InitHelperNormalized(GrayProcessedImage, ref histograms, ref colors);
+                    break;
+
+                case ImageType.ProcessedColor:
+                    ProcessedHistogramOn = true;
+                    Title = "Color - Processed Image Normalized Histogram";
+
+                    InitHelperNormalized(ColorProcessedImage, ref histograms, ref colors);
+                    break;
+            }
+
+            InitializeHistogram(histograms, colors);
+        }
+
         public void CreateHistogram<T>(List<(T[] Histogram, string PlotColor)> values)
         {
             List<T[]> histograms = values.Select(_ => _.Histogram).ToList();
@@ -137,6 +176,23 @@ namespace Framework.ViewModel
             histograms.Add(ComputeHistogram(image[0]));
             histograms.Add(ComputeHistogram(image[1]));
             histograms.Add(ComputeHistogram(image[2]));
+
+            colors.Add(Brushes.Blue.ToString());
+            colors.Add(Brushes.Green.ToString());
+            colors.Add(Brushes.Red.ToString());
+        }
+
+        private void InitHelperNormalized(Image<Gray, byte> image, ref List<double[]> histograms, ref List<string> colors)
+        {
+            histograms.Add(ComputeNormalizedHistogram(image));
+            colors.Add(Brushes.Black.ToString());
+        }
+
+        private void InitHelperNormalized(Image<Bgr, byte> image, ref List<double[]> histograms, ref List<string> colors)
+        {
+            histograms.Add(ComputeNormalizedHistogram(image, 0));
+            histograms.Add(ComputeNormalizedHistogram(image, 1));
+            histograms.Add(ComputeNormalizedHistogram(image, 2));
 
             colors.Add(Brushes.Blue.ToString());
             colors.Add(Brushes.Green.ToString());

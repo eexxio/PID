@@ -443,6 +443,78 @@ namespace Framework.ViewModel
         }
         #endregion
 
+        #region Initial image normalized histogram
+        private ICommand _normalizedHistogramInitialImageCommand;
+        public ICommand NormalizedHistogramInitialImageCommand
+        {
+            get
+            {
+                if (_normalizedHistogramInitialImageCommand == null)
+                    _normalizedHistogramInitialImageCommand = new RelayCommand(NormalizedHistogramInitialImage);
+                return _normalizedHistogramInitialImageCommand;
+            }
+        }
+
+        private void NormalizedHistogramInitialImage(object parameter)
+        {
+            if (InitialHistogramOn == true) return;
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            HistogramWindow window = null;
+
+            if (ColorInitialImage != null)
+            {
+                window = new HistogramWindow(_mainVM, ImageType.InitialColor, true);
+            }
+            else if (GrayInitialImage != null)
+            {
+                window = new HistogramWindow(_mainVM, ImageType.InitialGray, true);
+            }
+
+            window.Show();
+        }
+        #endregion
+
+        #region Processed image normalized histogram
+        private ICommand _normalizedHistogramProcessedImageCommand;
+        public ICommand NormalizedHistogramProcessedImageCommand
+        {
+            get
+            {
+                if (_normalizedHistogramProcessedImageCommand == null)
+                    _normalizedHistogramProcessedImageCommand = new RelayCommand(NormalizedHistogramProcessedImage);
+                return _normalizedHistogramProcessedImageCommand;
+            }
+        }
+
+        private void NormalizedHistogramProcessedImage(object parameter)
+        {
+            if (ProcessedHistogramOn == true) return;
+            if (ProcessedImage == null)
+            {
+                MessageBox.Show("Please process an image first!");
+                return;
+            }
+
+            HistogramWindow window = null;
+
+            if (ColorProcessedImage != null)
+            {
+                window = new HistogramWindow(_mainVM, ImageType.ProcessedColor, true);
+            }
+            else if (GrayProcessedImage != null)
+            {
+                window = new HistogramWindow(_mainVM, ImageType.ProcessedGray, true);
+            }
+
+            window.Show();
+        }
+        #endregion
+
         #endregion
 
         #region Copy image

@@ -10,7 +10,7 @@ namespace Framework.View
         private readonly HistogramVM _histogramVM;
         private readonly ImageType _imageType = ImageType.None;
 
-        public HistogramWindow(MainVM mainVM, ImageType type)
+        public HistogramWindow(MainVM mainVM, ImageType type, bool normalized = false)
         {
             InitializeComponent();
 
@@ -21,7 +21,15 @@ namespace Framework.View
 
             if (type != ImageType.None)
             {
-                _histogramVM.CreateHistogram(_imageType = type);
+                _imageType = type;
+                if (normalized)
+                {
+                    _histogramVM.CreateNormalizedHistogram(type);
+                }
+                else
+                {
+                    _histogramVM.CreateHistogram(type);
+                }
             }
 
             DataContext = _histogramVM;
