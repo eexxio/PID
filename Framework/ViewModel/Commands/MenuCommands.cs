@@ -781,6 +781,56 @@ namespace Framework.ViewModel
         #endregion
 
         #region Pointwise operations
+
+        #region Contrast and Brightness
+        private ICommand _contrastAndBrightnessCommand;
+        public ICommand ContrastAndBrightnessCommand
+        {
+            get
+            {
+                if (_contrastAndBrightnessCommand == null)
+                    _contrastAndBrightnessCommand = new RelayCommand(ContrastAndBrightness);
+                return _contrastAndBrightnessCommand;
+            }
+        }
+
+        private void ContrastAndBrightness(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Alpha (contrast):", "Beta (brightness):" });
+            dialog.Title = "Contrast and Brightness";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            double alpha = values[0];
+            double beta = values[1];
+
+            if (alpha <= 0)
+            {
+                MessageBox.Show("Alpha must be a strictly positive value!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = PointwiseOperations.ContrastAndBrightness(GrayInitialImage, alpha, beta);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = PointwiseOperations.ContrastAndBrightness(ColorInitialImage, alpha, beta);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Thresholding
