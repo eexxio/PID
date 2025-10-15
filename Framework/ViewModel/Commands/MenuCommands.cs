@@ -831,6 +831,54 @@ namespace Framework.ViewModel
         }
         #endregion
 
+        #region Gamma operator
+        private ICommand _gammaOperatorCommand;
+        public ICommand GammaOperatorCommand
+        {
+            get
+            {
+                if (_gammaOperatorCommand == null)
+                    _gammaOperatorCommand = new RelayCommand(GammaOperator);
+                return _gammaOperatorCommand;
+            }
+        }
+
+        private void GammaOperator(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Gamma:" });
+            dialog.Title = "Gamma Operator";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            double gamma = values[0];
+
+            if (gamma <= 0)
+            {
+                MessageBox.Show("Gamma must be a strictly positive value!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = PointwiseOperations.GammaOperator(GrayInitialImage, gamma);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = PointwiseOperations.GammaOperator(ColorInitialImage, gamma);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Thresholding
