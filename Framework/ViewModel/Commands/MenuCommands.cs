@@ -954,6 +954,39 @@ namespace Framework.ViewModel
         #endregion
 
         #region Thresholding
+        private ICommand _otsuThresholdingCommand;
+        public ICommand OtsuThresholdingCommand
+        {
+            get
+            {
+                if (_otsuThresholdingCommand == null)
+                    _otsuThresholdingCommand = new RelayCommand(OtsuThresholding);
+                return _otsuThresholdingCommand;
+            }
+        }
+        private void OtsuThresholding(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Otsu thresholding is only available for grayscale images!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            int threshold = Thresholding.OtsuThreshold(GrayInitialImage);
+
+            GrayProcessedImage = Tools.Binary(GrayInitialImage, threshold);
+            ProcessedImage = Convert(GrayProcessedImage);
+
+            MessageBox.Show($"Otsu's optimal threshold value is: {threshold}", "Otsu Thresholding");
+        }
         #endregion
 
         #region Filters
