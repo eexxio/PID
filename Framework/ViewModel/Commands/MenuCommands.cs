@@ -990,6 +990,43 @@ namespace Framework.ViewModel
         #endregion
 
         #region Filters
+        private ICommand _medianFilteringCommand;
+        public ICommand MedianFilteringCommand
+        {
+            get
+            {
+                if (_medianFilteringCommand == null)
+                    _medianFilteringCommand = new RelayCommand(MedianFiltering);
+                return _medianFilteringCommand;
+            }
+        }
+
+        private void MedianFiltering(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Median filtering is only available for grayscale images!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Kernel size:" });
+            dialog.Title = "Median Filtering";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            int kernelSize = (int)values[0];
+
+            ClearProcessedCanvas(parameter);
+
+            GrayProcessedImage = Filters.MedianFiltering(GrayInitialImage, kernelSize);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
         #endregion
 
         #region Morphological operations
