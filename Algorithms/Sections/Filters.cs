@@ -27,35 +27,75 @@ namespace Algorithms.Sections
                 l = l + 1;
             }
 
-            Image<Gray, byte> result = new Image<Gray, byte>(I.Width, I.Height);
-            int[] H = new int[256];
             int r = l / 2;
 
-            for (int y = r; y < I.Height - r; y++)
+            Image<Gray, byte> padded = new Image<Gray, byte>(I.Width + 2 * r, I.Height + 2 * r);
+
+            for (int y = 0; y < I.Height; y++)
             {
-                for (int x = r; x < I.Width - r; x++)
+                for (int x = 0; x < I.Width; x++)
                 {
-                    if (x == r)
+                    padded.Data[y + r, x + r, 0] = I.Data[y, x, 0];
+                }
+            }
+
+            for (int y = 0; y < r; y++)
+            {
+                for (int x = 0; x < I.Width; x++)
+                {
+                    padded.Data[y, x + r, 0] = I.Data[0, x, 0];
+                    padded.Data[I.Height + r + y, x + r, 0] = I.Data[I.Height - 1, x, 0];
+                }
+            }
+
+            for (int y = 0; y < I.Height; y++)
+            {
+                for (int x = 0; x < r; x++)
+                {
+                    padded.Data[y + r, x, 0] = I.Data[y, 0, 0];
+                    padded.Data[y + r, I.Width + r + x, 0] = I.Data[y, I.Width - 1, 0];
+                }
+            }
+
+            for (int y = 0; y < r; y++)
+            {
+                for (int x = 0; x < r; x++)
+                {
+                    padded.Data[y, x, 0] = I.Data[0, 0, 0];
+                    padded.Data[y, I.Width + r + x, 0] = I.Data[0, I.Width - 1, 0];
+                    padded.Data[I.Height + r + y, x, 0] = I.Data[I.Height - 1, 0, 0];
+                    padded.Data[I.Height + r + y, I.Width + r + x, 0] = I.Data[I.Height - 1, I.Width - 1, 0];
+                }
+            }
+
+            Image<Gray, byte> result = new Image<Gray, byte>(I.Width, I.Height);
+            int[] H = new int[256];
+
+            for (int y = 0; y < I.Height; y++)
+            {
+                for (int x = 0; x < I.Width; x++)
+                {
+                    if (x == 0)
                     {
                         for (int i = 0; i < 256; i++)
                         {
                             H[i] = 0;
                         }
 
-                        for (int i = -r; i <= r; i++)
+                        for (int i = 0; i <= 2 * r; i++)
                         {
-                            for (int j = -r; j <= r; j++)
+                            for (int j = 0; j <= 2 * r; j++)
                             {
-                                H[I.Data[y + i, x + j, 0]]++;
+                                H[padded.Data[y + i, x + j, 0]]++;
                             }
                         }
                     }
                     else
                     {
-                        for (int k = -r; k <= r; k++)
+                        for (int k = 0; k <= 2 * r; k++)
                         {
-                            H[I.Data[y + k, x - r - 1, 0]]--;
-                            H[I.Data[y + k, x + r, 0]]++;
+                            H[padded.Data[y + k, x - 1, 0]]--;
+                            H[padded.Data[y + k, x + 2 * r, 0]]++;
                         }
                     }
 
