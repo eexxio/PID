@@ -1027,6 +1027,46 @@ namespace Framework.ViewModel
             GrayProcessedImage = Filters.MedianFiltering(GrayInitialImage, kernelSize);
             ProcessedImage = Convert(GrayProcessedImage);
         }
+
+        private ICommand _sobelDirectionalCommand;
+        public ICommand SobelDirectionalCommand
+        {
+            get
+            {
+                if (_sobelDirectionalCommand == null)
+                    _sobelDirectionalCommand = new RelayCommand(SobelDirectional);
+                return _sobelDirectionalCommand;
+            }
+        }
+
+        private void SobelDirectional(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Sobel directional detection is only available for grayscale images!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Threshold:", "Angle (degrees):", "Tolerance (degrees):" });
+            dialog.Title = "Sobel Directional Detection";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            int threshold = (int)values[0];
+            double angle = values[1];
+            double tolerance = values[2];
+
+            ClearProcessedCanvas(parameter);
+
+            GrayProcessedImage = Filters.SobelDirectionalDetection(GrayInitialImage, threshold, angle, tolerance);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
         #endregion
 
         #region Morphological operations
