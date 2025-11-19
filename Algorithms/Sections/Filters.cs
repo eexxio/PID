@@ -5,6 +5,50 @@ namespace Algorithms.Sections
 {
     public class Filters
     {
+        public static Image<Gray, byte> PadImage(Image<Gray, byte> I, int padding)
+        {
+            Image<Gray, byte> padded = new Image<Gray, byte>(I.Width + 2 * padding, I.Height + 2 * padding);
+
+            for (int y = 0; y < I.Height; y++)
+            {
+                for (int x = 0; x < I.Width; x++)
+                {
+                    padded.Data[y + padding, x + padding, 0] = I.Data[y, x, 0];
+                }
+            }
+
+            for (int y = 0; y < padding; y++)
+            {
+                for (int x = 0; x < I.Width; x++)
+                {
+                    padded.Data[y, x + padding, 0] = I.Data[0, x, 0];
+                    padded.Data[I.Height + padding + y, x + padding, 0] = I.Data[I.Height - 1, x, 0];
+                }
+            }
+
+            for (int y = 0; y < I.Height; y++)
+            {
+                for (int x = 0; x < padding; x++)
+                {
+                    padded.Data[y + padding, x, 0] = I.Data[y, 0, 0];
+                    padded.Data[y + padding, I.Width + padding + x, 0] = I.Data[y, I.Width - 1, 0];
+                }
+            }
+
+            for (int y = 0; y < padding; y++)
+            {
+                for (int x = 0; x < padding; x++)
+                {
+                    padded.Data[y, x, 0] = I.Data[0, 0, 0];
+                    padded.Data[y, I.Width + padding + x, 0] = I.Data[0, I.Width - 1, 0];
+                    padded.Data[I.Height + padding + y, x, 0] = I.Data[I.Height - 1, 0, 0];
+                    padded.Data[I.Height + padding + y, I.Width + padding + x, 0] = I.Data[I.Height - 1, I.Width - 1, 0];
+                }
+            }
+
+            return padded;
+        }
+
         public static byte Median(int[] H, int l)
         {
             int k = 0;
@@ -29,44 +73,7 @@ namespace Algorithms.Sections
 
             int r = l / 2;
 
-            Image<Gray, byte> padded = new Image<Gray, byte>(I.Width + 2 * r, I.Height + 2 * r);
-
-            for (int y = 0; y < I.Height; y++)
-            {
-                for (int x = 0; x < I.Width; x++)
-                {
-                    padded.Data[y + r, x + r, 0] = I.Data[y, x, 0];
-                }
-            }
-
-            for (int y = 0; y < r; y++)
-            {
-                for (int x = 0; x < I.Width; x++)
-                {
-                    padded.Data[y, x + r, 0] = I.Data[0, x, 0];
-                    padded.Data[I.Height + r + y, x + r, 0] = I.Data[I.Height - 1, x, 0];
-                }
-            }
-
-            for (int y = 0; y < I.Height; y++)
-            {
-                for (int x = 0; x < r; x++)
-                {
-                    padded.Data[y + r, x, 0] = I.Data[y, 0, 0];
-                    padded.Data[y + r, I.Width + r + x, 0] = I.Data[y, I.Width - 1, 0];
-                }
-            }
-
-            for (int y = 0; y < r; y++)
-            {
-                for (int x = 0; x < r; x++)
-                {
-                    padded.Data[y, x, 0] = I.Data[0, 0, 0];
-                    padded.Data[y, I.Width + r + x, 0] = I.Data[0, I.Width - 1, 0];
-                    padded.Data[I.Height + r + y, x, 0] = I.Data[I.Height - 1, 0, 0];
-                    padded.Data[I.Height + r + y, I.Width + r + x, 0] = I.Data[I.Height - 1, I.Width - 1, 0];
-                }
-            }
+            Image<Gray, byte> padded = PadImage(I, r);
 
             Image<Gray, byte> result = new Image<Gray, byte>(I.Width, I.Height);
             int[] H = new int[256];
