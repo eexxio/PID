@@ -93,12 +93,6 @@ namespace Framework.View
             {
                 MouseClickCollection.Add(position);
                 LastMouseClick = position;
-
-                if (MouseClickCollection.Count == 2 && sender == initialImage)
-                {
-                    object[] canvases = new object[] { initialImageCanvas, processedImageCanvas };
-                    _mainVM.MenuCommands.CropImageCommand.Execute(canvases);
-                }
             }
         }
 

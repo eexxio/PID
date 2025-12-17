@@ -1073,6 +1073,81 @@ namespace Framework.ViewModel
         #endregion
 
         #region Morphological operations
+        private ICommand _regionFillingCommand;
+        public ICommand RegionFillingCommand
+        {
+            get
+            {
+                if (_regionFillingCommand == null)
+                    _regionFillingCommand = new RelayCommand(RegionFilling);
+                return _regionFillingCommand;
+            }
+        }
+
+        private void RegionFilling(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Region filling is only available for grayscale images!");
+                return;
+            }
+
+            if (!IsBinaryImage(GrayInitialImage))
+            {
+                MessageBox.Show("Region filling requires a binary image! Please apply thresholding first (Tools > Binary or Thresholding > Otsu).");
+                return;
+            }
+
+            if (MouseClickCollection.Count == 0)
+            {
+                MessageBox.Show("Please select seed points from the initial image by clicking on it! Right-click to clear selections.");
+                return;
+            }
+
+            int seSize = 3;
+
+            ClearProcessedCanvas(parameter);
+
+            try
+            {
+                List<System.Drawing.Point> seedPoints = new List<System.Drawing.Point>();
+                foreach (System.Windows.Point wpfPoint in MouseClickCollection)
+                {
+                    seedPoints.Add(new System.Drawing.Point((int)wpfPoint.X, (int)wpfPoint.Y));
+                }
+
+                GrayProcessedImage = MorphologicalOperations.RegionFilling(GrayInitialImage, seedPoints, seSize);
+                ProcessedImage = Convert(GrayProcessedImage);
+
+                MessageBox.Show($"Region filling completed successfully!\nSeed points used: {seedPoints.Count}", "Region Filling");
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Error during region filling: {ex.Message}", "Region Filling Error");
+            }
+
+            MouseClickCollection.Clear();
+        }
+
+        private bool IsBinaryImage(Image<Gray, byte> image)
+        {
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    byte value = image.Data[y, x, 0];
+                    if (value != 0 && value != 255)
+                        return false;
+                }
+            }
+            return true;
+        }
         #endregion
 
         #region Geometric transformations
