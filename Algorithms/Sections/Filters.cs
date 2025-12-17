@@ -169,5 +169,36 @@ namespace Algorithms.Sections
 
             return result;
         }
+
+        public static Image<Gray, byte> SobelEdgeDetection(Image<Gray, byte> I)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(I.Width, I.Height);
+
+            int[,] Sx = new int[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            int[,] Sy = new int[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+
+            for (int y = 1; y < I.Height - 1; y++)
+            {
+                for (int x = 1; x < I.Width - 1; x++)
+                {
+                    int fx = 0;
+                    int fy = 0;
+
+                    for (int i = -1; i <= 1; i++)
+                    {
+                        for (int j = -1; j <= 1; j++)
+                        {
+                            fx += I.Data[y + i, x + j, 0] * Sx[i + 1, j + 1];
+                            fy += I.Data[y + i, x + j, 0] * Sy[i + 1, j + 1];
+                        }
+                    }
+
+                    double magnitude = System.Math.Sqrt(fx * fx + fy * fy);
+                    result.Data[y, x, 0] = (byte)System.Math.Min(255, magnitude);
+                }
+            }
+
+            return result;
+        }
     }
 }

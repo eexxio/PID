@@ -48,6 +48,9 @@ namespace Framework.ViewModel
             set => _mainVM.ScaleValue = value;
         }
 
+        private int[,] _houghAccumulator;
+        private int _houghRMax;
+
         #region File
 
         #region Load grayscale image
@@ -1076,6 +1079,201 @@ namespace Framework.ViewModel
         #endregion
 
         #region Segmentation
+
+        #region Hough Transform
+        private ICommand _houghTransformCommand;
+        public ICommand HoughTransformCommand
+        {
+            get
+            {
+                if (_houghTransformCommand == null)
+                    _houghTransformCommand = new RelayCommand(HoughTransform);
+                return _houghTransformCommand;
+            }
+        }
+
+        private void HoughTransform(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please add an image!");
+                return;
+            }
+
+            if (GrayInitialImage == null)
+            {
+                MessageBox.Show("Hough transform is only available for grayscale images!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Threshold (0-255):" });
+            dialog.Title = "Hough Transform";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            int threshold = (int)values[0];
+
+            if (threshold < 0 || threshold > 255)
+            {
+                MessageBox.Show("Threshold must be between 0 and 255!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter);
+
+            GrayProcessedImage = Segmentation.HoughTransform(GrayInitialImage, threshold, out _houghAccumulator, out _houghRMax);
+            ProcessedImage = Convert(GrayProcessedImage);
+
+            MessageBox.Show("Hough accumulator matrix displayed.\n" +
+                            $"Matrix size: {_houghAccumulator.GetLength(0)} x {_houghAccumulator.GetLength(1)}\n" +
+                            "Use 'Detect Hough Lines' to find lines.",
+                            "Hough Transform");
+        }
+        #endregion
+
+        #region Hough Line Detection
+        private ICommand _houghLineDetectionCommand;
+        public ICommand HoughLineDetectionCommand
+        {
+            get
+            {
+                if (_houghLineDetectionCommand == null)
+                    _houghLineDetectionCommand = new RelayCommand(HoughLineDetection);
+                return _houghLineDetectionCommand;
+            }
+        }
+
+        private void HoughLineDetection(object parameter)
+        {
+            if (_houghAccumulator == null)
+            {
+                MessageBox.Show("Please run Hough Transform first!");
+                return;
+            }
+
+            DialogWindow dialog = new DialogWindow(_mainVM, new List<string> { "Max lines to detect:", "Min votes (% of max):" });
+            dialog.Title = "Hough Line Detection";
+            dialog.ShowDialog();
+
+            List<double> values = dialog.GetValues();
+            int maxLines = (int)values[0];
+            double minVotesPercent = values[1];
+
+            if (maxLines < 1 || maxLines > 100)
+            {
+                MessageBox.Show("Max lines must be between 1 and 100!");
+                return;
+            }
+
+            if (minVotesPercent < 0 || minVotesPercent > 100)
+            {
+                MessageBox.Show("Min votes percent must be between 0 and 100!");
+                return;
+            }
+
+            var canvases = (object[])parameter;
+            Canvas initialCanvas = canvases[0] as Canvas;
+
+            RemoveUiElements<System.Windows.Shapes.Line>(initialCanvas);
+
+            List<HoughLine> lines = Segmentation.DetectLines(_houghAccumulator, _houghRMax, maxLines, minVotesPercent);
+
+            DrawDetectedLines(initialCanvas, lines, GrayInitialImage.Width, GrayInitialImage.Height, ScaleValue);
+
+            MessageBox.Show($"Detected {lines.Count} lines.\n" +
+                            $"Lines drawn in red on the original image.",
+                            "Hough Line Detection");
+        }
+
+        private void DrawDetectedLines(Canvas canvas, List<HoughLine> lines, int imageWidth, int imageHeight, double scaleValue)
+        {
+            foreach (var line in lines)
+            {
+                double thetaRad = line.Theta * System.Math.PI / 180.0;
+                double cosTheta = System.Math.Cos(thetaRad);
+                double sinTheta = System.Math.Sin(thetaRad);
+
+                Point p1, p2;
+
+                if (System.Math.Abs(sinTheta) > 0.001)
+                {
+                    double y1 = (line.R - 0 * cosTheta) / sinTheta;
+                    double y2 = (line.R - (imageWidth - 1) * cosTheta) / sinTheta;
+
+                    p1 = new Point(0, y1);
+                    p2 = new Point(imageWidth - 1, y2);
+                }
+                else
+                {
+                    double x1 = line.R / cosTheta;
+
+                    p1 = new Point(x1, 0);
+                    p2 = new Point(x1, imageHeight - 1);
+                }
+
+                if (ClipLine(ref p1, ref p2, imageWidth, imageHeight))
+                {
+                    DrawLine(canvas, p1, p2, 2, Brushes.Red, scaleValue);
+                }
+            }
+        }
+
+        private bool ClipLine(ref Point p1, ref Point p2, int width, int height)
+        {
+            double x1 = p1.X, y1 = p1.Y;
+            double x2 = p2.X, y2 = p2.Y;
+
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+
+            double tEnter = 0.0, tExit = 1.0;
+
+            if (ClipTest(-dx, x1, ref tEnter, ref tExit) &&
+                ClipTest(dx, width - 1 - x1, ref tEnter, ref tExit) &&
+                ClipTest(-dy, y1, ref tEnter, ref tExit) &&
+                ClipTest(dy, height - 1 - y1, ref tEnter, ref tExit))
+            {
+                if (tExit < 1.0)
+                {
+                    x2 = x1 + tExit * dx;
+                    y2 = y1 + tExit * dy;
+                }
+                if (tEnter > 0.0)
+                {
+                    x1 = x1 + tEnter * dx;
+                    y1 = y1 + tEnter * dy;
+                }
+
+                p1 = new Point(x1, y1);
+                p2 = new Point(x2, y2);
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ClipTest(double p, double q, ref double tEnter, ref double tExit)
+        {
+            if (p == 0)
+                return q >= 0;
+
+            double t = q / p;
+
+            if (p < 0)
+            {
+                if (t > tExit) return false;
+                if (t > tEnter) tEnter = t;
+            }
+            else
+            {
+                if (t < tEnter) return false;
+                if (t < tExit) tExit = t;
+            }
+
+            return true;
+        }
+        #endregion
+
         #endregion
 
         #region Use processed image as initial image

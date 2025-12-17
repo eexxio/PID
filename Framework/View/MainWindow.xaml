@@ -260,6 +260,22 @@
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
                       Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
 
+                <MenuItem Header="Hough Transform (Display Matrix)"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.HoughTransformCommand}"
+                          CommandParameter="{Binding ElementName=processedImageCanvas}"/>
+
+                <MenuItem Header="Detect Hough Lines"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.HoughLineDetectionCommand}">
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource arrayMultiValueConverter}">
+                            <Binding ElementName="initialImageCanvas"/>
+                            <Binding ElementName="processedImageCanvas"/>
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+
             </MenuItem>
 
             <MenuItem Header="Use processed image as initial image" 
